@@ -1,3 +1,6 @@
 numpy==1.24.3
 pandas==2.0.3
+plotly==5.9.0
+pygame==2.5.2
+Requests==2.31.0
 streamlit==1.33.0
