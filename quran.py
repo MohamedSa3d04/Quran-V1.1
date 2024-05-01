@@ -6,7 +6,7 @@ import requests
 import os.path
 from pygame import mixer
 
-st.set_page_config(layout='wide')
+st.set_page_config(page_title="The Holy Quran", layout='wide')
 with open('Style.css') as Style:
     st.markdown(f'<style>{Style.read()}</style>', unsafe_allow_html=True)
 
