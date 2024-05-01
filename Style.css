@@ -1,0 +1,17 @@
+p.aya{
+    font-size: 50px;
+    font-family: "Arabic Typesetting";
+    direction: rtl;
+    background: rgb(31 32 31);
+    padding: 0px 16px 0px 0px;
+    border-radius: 10px;
+    box-shadow: 1px 1px 0px gray;
+}
+button.st-emotion-cache-19rxjzo{
+    font-size: 20px;
+    font-family: "Arabic Typesetting";
+    color: rgb(0, 255, 13);
+    border: none;
+    border-radius: 8px;
+    box-shadow: 1px 1px 1px white;
+}
