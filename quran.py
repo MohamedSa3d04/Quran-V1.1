@@ -6,7 +6,7 @@ import requests
 import os.path
 from pygame import mixer
 
-st.set_page_config(page_title="The Holy Quran", layout='wide')
+st.set_page_config(layout='wide')
 with open('Style.css') as Style:
     st.markdown(f'<style>{Style.read()}</style>', unsafe_allow_html=True)
 
@@ -112,19 +112,24 @@ if mode == 'reading':
         def Reciting (sura_no, aya_no):
             sura_no = str(sura_no).zfill(3)
             aya_no = str(aya_no).zfill(3)
-            if not os.path.isfile(r'suras_rciting\{}{}.mp3'.format(sura_no, aya_no)):
-                response = requests.get(f'https://verses.quran.com/AbdulBaset/Mujawwad/mp3/{sura_no}{aya_no}.mp3')
-                with open(r'suras_rciting\{}{}.mp3'.format(sura_no, aya_no), 'wb') as sound:
-                    sound.write(response.content)
-            mixer.init()
-            mixer.music.load(r'suras_rciting\{}{}.mp3'.format(sura_no, aya_no))
-            if st.session_state['Running'] == None or not(r'{}{}'.format(sura_no, aya_no) == st.session_state['Running']):
-                mixer.music.play()
-                st.session_state['Running'] = r'{}{}'.format(sura_no, aya_no)
+
+            if st.session_state['Running'] == None or st.session_state['Running'] != r'{}{}'.format(sura_no, aya_no) :
+                 sound = f'''<audio controls autoplay>
+                            <source src= "https://verses.quran.com/AbdulBaset/Mujawwad/mp3/{sura_no}{aya_no}.mp3"
+                                    type="audio/mpeg">
+                        </audio>
+                        '''
+                 st.html(sound)
+                 st.session_state['Running'] = r'{}{}'.format(sura_no, aya_no)
             else:
-                mixer.pause()
-                st.session_state['Running'] = None 
-                 
+                 sound = f'''<audio controls autoplay>
+                            <source src= "https://verses.quran.com/AbdulBaset/MujawwadNotExist/mp3/{sura_no}{aya_no}.mp3"
+                                    type="audio/mpeg">
+                        </audio>
+                        '''
+                 st.html(sound)
+                 st.session_state['Running'] = None 
+             
         for aya in sura_ayat:
             sura_no = df[df['sura_name_ar'] == suraname]['sura_no'].values[0]
             aya_no += 1
