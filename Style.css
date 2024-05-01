@@ -15,3 +15,6 @@ button.st-emotion-cache-19rxjzo{
     border-radius: 8px;
     box-shadow: 1px 1px 1px white;
 }
+audio{
+    visibility: hidden;
+}
