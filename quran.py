@@ -13,7 +13,7 @@ with open('Style.css') as Style:
 df = pd.read_csv('hafs_smart_v8.csv', low_memory=False, index_col='id', usecols=['id','aya_text_emlaey','sura_name_ar','sura_no','aya_no','jozz','sura_no'])
 df['aya_text'] = pd.read_csv('./quran_emlay')['text'].values
 df = df[['sura_name_ar','aya_text','aya_text_emlaey','aya_no','jozz','sura_no']]
-
+# print(df[df.index == 6235]['aya_text'].values[0])
 def t():
     if 'counter' in st.session_state:
      st.session_state.clear()
@@ -140,6 +140,7 @@ if mode == 'reading':
 else:
     def startTest():
         st.session_state['ques_num'] = 1
+        st.session_state['choosed_index'] = 0
         st.session_state['numTrue'] = 0
         st.session_state['trueAya'] = []
         st.session_state['falseAya'] = []
@@ -153,7 +154,7 @@ else:
     tMode = sbTest.selectbox('حدد نوع الإختبار : ',['الاختبار في جزء معين','الاختبار في عدد أجزاء معين','سؤال من كل جزء'], on_change = startTest)
     tMode = 'one' if tMode == 'الاختبار في جزء معين' else 'Multi' if tMode == 'الاختبار في عدد أجزاء معين' else 'oneForAll'
     def Testing(Easy = True, oneForJuzz = False):
-        global jozzAyat
+        global my_df
         if st.session_state['ques_num'] <= quesNumbers :
             if oneForJuzz:
              st.markdown(f"<p style='margin : 0px 0px -38px 0px; font-size:50px; font-family : Arabic Typesetting; color:red;  direction: rtl;'>سؤال الجزء : {st.session_state['ques_num']}</p>", unsafe_allow_html=True)
@@ -176,9 +177,9 @@ else:
                     st.markdown(s, unsafe_allow_html=True)
             def next_aya():
                 global rand_aya
-                rand_aya = st.session_state['rand_aya']
-                index = df[df['aya_text'] == rand_aya].index[0]
-                rand_aya = df.iloc[index]['aya_text']
+                st.session_state['choosed_index'] += 1
+                index = st.session_state['choosed_index']
+                rand_aya = df.iloc[index-1]['aya_text']
                 st.session_state['rand_aya'] = rand_aya
                 if not Easy:
                     st.session_state['counter'] += 22
@@ -187,15 +188,15 @@ else:
                 
             def prev_aya():
                 global rand_aya
-                rand_aya = st.session_state['rand_aya']
-                index = df[df['aya_text'] == rand_aya].index[0]
-                rand_aya = df.iloc[index-2]['aya_text']
+                st.session_state['choosed_index'] -= 1
+                index = st.session_state['choosed_index']
+                rand_aya = df.iloc[index-1]['aya_text']
                 st.session_state['rand_aya'] = rand_aya
                 
 
 
             def next_ques(trueOrfalse):
-                global rand_aya, jozzAyat
+                global rand_aya, my_df
                 st.session_state['ques_num'] += 1 
                 st.session_state['counter'] = 0
                 if trueOrfalse :
@@ -209,11 +210,14 @@ else:
                     st.session_state['dicBar']['sura'].append(df[df['aya_text'] == st.session_state['rand_aya']]['sura_name_ar'].values[0])
                     st.session_state['dicBar']['answer'].append('إجابة خاطئة')
                 if oneForJuzz and st.session_state['ques_num'] <= 30:
-                    jozzAyat = df[df['jozz'] == st.session_state['ques_num']]['aya_text'].values
-                st.session_state['rand_aya'] = np.random.choice(jozzAyat)
+                    my_df = df[df['jozz'] == st.session_state['ques_num']]['aya_text']
+                if oneForJuzz and st.session_state['ques_num'] == 31:
+                    my_df = df[df['jozz'] == 1]['aya_text']
+                st.session_state['choosed_index'] = np.random.choice(my_df.index)
+                st.session_state['rand_aya'] = my_df.loc[st.session_state['choosed_index']]
                 if st.session_state['ques_num'] > quesNumbers:
                     def show_results():
-                        st.session_state['Running'] = False
+                        st.session_state['Running'] = False 
                         st.session_state['ques_num'] = 1
                         c1,c2,c3,c4 = st.columns((20,20,20,10))
                         c1.metric("عدد الاسئلة", quesNumbers)
@@ -230,7 +234,9 @@ else:
                         s = f"<p style= 'margin : 0px 0px -38px 0px; font-size:50px; font-family : Arabic Typesetting; color:#86EE7C; direction: rtl;'>الإجابات الصحيحة : {st.session_state['numTrue']}</p>"
                         st.markdown(s, unsafe_allow_html=True)
                         for aya in st.session_state['trueAya']:
-                            s = f"<p style='margin : 0px 0px -38px 0px; font-size:50px; font-family : Arabic Typesetting;  direction: rtl;'>{aya}</p>"
+                            s = f"<p style='margin : 0px 0px -38px 0px; font-size:50px; font-family : Arabic Typesetting;  direction: rtl;'>{aya} </p>"
+                            st.markdown(s, unsafe_allow_html=True)
+                            s = f"<p style='margin : 0px 0px -38px 0px; color:#8B22F4; font-size:50px; font-family : Arabic Typesetting;  direction: rtl;'>اسم السورة : {df[df['aya_text'] == aya]['sura_name_ar'].values[0]} </p>"
                             st.markdown(s, unsafe_allow_html=True)
                             st.divider()
                         st.divider()
@@ -239,13 +245,17 @@ else:
                         for aya in st.session_state['falseAya']:
                             s = f"<p style='margin : 0px 0px -38px 0px; font-size:50px; font-family : Arabic Typesetting;  direction: rtl;'>{aya}</p>"
                             st.markdown(s, unsafe_allow_html=True)
+                            s = f"<p style='margin : 0px 0px -38px 0px; color:#8B22F4; font-size:50px; font-family : Arabic Typesetting;  direction: rtl;'>اسم السورة : {df[df['aya_text'] == aya]['sura_name_ar'].values[0]} </p>"
+                            st.markdown(s, unsafe_allow_html=True)
                             st.divider()
 
                     st.button('عرض النتائج', on_click = show_results, type='primary')
 
             def skip_ques():
                 global rand_aya
-                st.session_state['rand_aya'] = np.random.choice(jozzAyat)
+                st.session_state['choosed_index'] = np.random.choice(my_df.index)
+                rand_aya = my_df.loc[st.session_state['choosed_index']]
+                st.session_state['rand_aya'] = rand_aya
             c1,c2,c3,c4 = st.columns((20,20,20,10))
             c1.button('الآية التالية', on_click=next_aya)   
             c2.button('الآية السابقة', on_click=prev_aya)   
@@ -257,10 +267,12 @@ else:
         if 'ques_num' not in st.session_state:
             startTest()
         jozzNumber = sbTest.selectbox('أدخل رقم الجزء : ',[jozz for jozz in range(1,31)], on_change = startTest)
-        jozzAyat = df[df['jozz'] == jozzNumber]['aya_text'].values
+        my_df = df[df['jozz'] == jozzNumber]['aya_text']
         def startTestone():
-            rand_aya = np.random.choice(jozzAyat)
+            choosed_index = np.random.choice(my_df.index)
+            rand_aya = my_df.loc[choosed_index]
             startTest()
+            st.session_state['choosed_index'] = choosed_index
             st.session_state['rand_aya'] = rand_aya
             st.session_state['Running'] = True
         sbTest.button('بدء الاختبار', on_click = startTestone)
@@ -273,11 +285,13 @@ else:
         toJuzz = sbTest.number_input('إلى الجزء : ', min_value = (fromJuzz+1), max_value = 30, on_change = startTest)
         Easy = sb.selectbox('حدد نوع الإختبار : ',['سهل','صعب'], on_change=startTest)
         Easy = True if Easy == 'سهل' else False
-        jozzAyat = df[(df['jozz'] >= fromJuzz) & (df['jozz'] <= toJuzz)]['aya_text'].values
-        
+        my_df = df[(df['jozz'] >= fromJuzz) & (df['jozz'] <= toJuzz)]['aya_text']
+
         def startTesttwo():
-            rand_aya = np.random.choice(jozzAyat)
+            choosed_index = np.random.choice(my_df.index)
+            rand_aya = my_df.loc[choosed_index]
             startTest()
+            st.session_state['choosed_index'] = choosed_index
             st.session_state['rand_aya'] = rand_aya
             st.session_state['Running'] = True
         if 'rand_aya' not in st.session_state:
@@ -300,4 +314,3 @@ else:
         sb.button('بدء الاختبار', on_click = startTestthree)
         if st.session_state['Running']:
             Testing(oneForJuzz=True)
-        
