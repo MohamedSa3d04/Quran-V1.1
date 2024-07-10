@@ -252,7 +252,7 @@ else:
                     st.button('عرض النتائج', on_click = show_results, type='primary')
 
             def skip_ques():
-                global rand_aya
+                global rand_aya, my_df
                 st.session_state['choosed_index'] = np.random.choice(my_df.index)
                 rand_aya = my_df.loc[st.session_state['choosed_index']]
                 st.session_state['rand_aya'] = rand_aya
@@ -305,12 +305,15 @@ else:
         if 'ques_num' not in st.session_state:
             startTest()
         quesNumbers = 30
-        jozzAyat = df[df['jozz'] == st.session_state['ques_num']]['aya_text'].values
+        my_df = df[df['jozz'] == st.session_state['ques_num']]['aya_text']
         def startTestthree():
+            choosed_index = np.random.choice(my_df.index)
+            rand_aya = my_df.loc[choosed_index]
             startTest()
-            rand_aya = np.random.choice(jozzAyat)
+            st.session_state['choosed_index'] = choosed_index
             st.session_state['rand_aya'] = rand_aya
             st.session_state['Running'] = True
         sb.button('بدء الاختبار', on_click = startTestthree)
         if st.session_state['Running']:
             Testing(oneForJuzz=True)
+        
