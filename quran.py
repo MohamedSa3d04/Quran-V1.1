@@ -74,7 +74,7 @@ if mode == 'reading':
         def next_ques():
             global rand_aya
             st.session_state['rand_aya'] = np.random.choice(sura_ayat)
-            st.session_state['ques_num'] += 13
+            st.session_state['ques_num'] += 1
             st.session_state['counter'] = 0
 
         def skip_ques():
