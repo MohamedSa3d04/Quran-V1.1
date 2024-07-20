@@ -264,7 +264,7 @@ else:
             c4.button('تخطي السؤال', on_click=skip_ques)
     if tMode == 'one':
         quesNumbers = sbTest.number_input('أدخل عدد الأسئلة : ', min_value = 1, max_value = 30, on_change = startTest)
-        if 'ques_num' not in st.session_state:
+        if 'ques_num' not in st.session_state or 'Running' not in st.session_state:
             startTest()
         jozzNumber = sbTest.selectbox('أدخل رقم الجزء : ',[jozz for jozz in range(1,31)], on_change = startTest)
         my_df = df[df['jozz'] == jozzNumber]['aya_text']
